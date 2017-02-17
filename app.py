@@ -8,9 +8,11 @@ from PyQt4.QtCore import Qt
 from imageUI import ImageUI
 from controllerUI import ControllerUI
 
+from pipeline import Pipeline
+
 class MainWindow(QtGui.QMainWindow):
     
-    def __init__(self):
+    def __init__(self, Pipeline):
         super(MainWindow, self).__init__()
         self.initUI()
 
