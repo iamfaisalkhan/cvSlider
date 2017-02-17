@@ -12,8 +12,11 @@ from pipeline import Pipeline
 
 class MainWindow(QtGui.QMainWindow):
     
-    def __init__(self, Pipeline):
+    def __init__(self, pipeline = Pipeline):
         super(MainWindow, self).__init__()
+
+        self.pipeline = pipeline
+
         self.initUI()
 
     def initUI(self):
@@ -22,7 +25,6 @@ class MainWindow(QtGui.QMainWindow):
 
         self.setGeometry(300, 300, 1200, 1024)
         self.setWindowTitle('OpenCV-pipeline')
-        #self.setWindowIcon(QtGui.QIcon('test.png'))
 
         self.cvImage = cv2.imread(r'signs_vehicles_xygrad.png')
         self.imageScene = ImageUI(self.cvImage)
@@ -32,7 +34,7 @@ class MainWindow(QtGui.QMainWindow):
         # Right Dock Widget
         dock = QtGui.QDockWidget('Controls', self)
         dock.setAllowedAreas(Qt.RightDockWidgetArea)
-        controllerWidget = ControllerUI()
+        controllerWidget = ControllerUI(self.pipeline)
         dock.setWidget(controllerWidget)
 
         self.addDockWidget(Qt.RightDockWidgetArea, dock)
