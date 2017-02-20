@@ -17,39 +17,42 @@ class ControllerUI(QWidget):
         super(ControllerUI, self).__init__()        
 
         self.pipeline = pipeline
-        self.initUI()
+        self._initUI()
 
-    def initUI(self):
+    def _initUI(self):
         blocks = len(self.pipeline.stages)
 
         main = QVBoxLayout()
 
+        self.btn = QPushButton("Apply Changes", self)
+        self.btn.clicked.connect(self._updateClicked)
+        toprow = QHBoxLayout()
+        toprow.addStretch(1)
+        toprow.addWidget(self.btn)
+        main.addLayout(toprow)
+
         for stage in self.pipeline.stages:
-            # print ("\nFunction\n\t %s"%stage['name'])
             vbox = QVBoxLayout()
             vbox.addWidget(QLabel("Function : %s"%(stage['name'])))
-
-            
-            # if len(stage['parameters']) > 0:
-            #     print("Args\n\t")
-
             for param in stage['parameters']:
                 if param.isRange():
                     slider = SliderUI(param)
                     vbox.addWidget(slider)
-                    
-                # print("\t %s:%s"%(param.name, param.value))
             main.addLayout(vbox)
-            # print()
-
         
+        from qrangeslider import QRangeSlider
+        slider = QRangeSlider(self)
+        main.addWidget(slider)
+
         main.addStretch(1)
 
         self.setLayout(main)
 
-    def changeValue(self, value):
-        self.textValue.setText("%d"%(value))
+    def _updateClicked(self):
+        self.emit(SIGNAL("applyChangesClicked()"))
 
+    def setEnabledApplyChanges(self, state = True):
+        self.btn.setEnabled(state)
 
 
 

@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import pickle
 
-def abs_sobel_thresh(img, orient='x', sobel_kernel=3, thresh=(0, 255)):
+def abs_sobel_thresh(img, orient='x', sobel_kernel=(1, 15), thresh=((0, 255), (0, 255)):
     # 1) Convert to grayscale
     gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
     # 2) Take the derivative in x or y given orient = 'x' or 'y'
@@ -27,7 +27,7 @@ def abs_sobel_thresh(img, orient='x', sobel_kernel=3, thresh=(0, 255)):
     
     return binary_output
 
-def mag_thresh(img, sobel_kernel=3, mag_thresh=(0, 255)):
+def mag_thresh(img, sobel_kernel=(1, 12), mag_thresh=((0, 255), (0, 255)):
         # Apply the following steps to img
     # 1) Convert to grayscale
     gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)

@@ -29,3 +29,6 @@ class ImageUI(QWidget):
 
         self.scene.addPixmap(self.mPixelMap)
         self.view = QGraphicsView(self.scene, self)
+
+    def updateImage(self, image = QImage):
+        print("Update Image")

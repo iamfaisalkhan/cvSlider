@@ -1,7 +1,5 @@
-import cv2
 import inspect
-
-import combining_thresholds
+import cv2
 
 class FuncParam:
     def __init__(self, param = inspect.Parameter, funcName="", index=0):
@@ -9,9 +7,6 @@ class FuncParam:
         self.name = param.name
         self.default = param.default
         self.value = self.default
-
-        if type(self.default) == tuple:
-            self.value = self.default[0]
         
         self.key = "%d_%s_%s"%(index, funcName, self.name)
 
@@ -45,8 +40,8 @@ class Pipeline:
     def getSource(self):
         return self.source
 
-    def addFunction(self, func, output_size=(500, 500), display=True):
-        funcName = func.__name__
+    def addStep(self, func, output_size=(500, 500), display=True):
+        funcName = func.__module__ + "." + func.__name__
         sig = inspect.signature(func)
 
         stage = []
@@ -57,28 +52,32 @@ class Pipeline:
 
         self.stages.append({"name" : funcName, "parameters" : stage})
 
-def main():
-    img = cv2.imread('signs_vehicles_xygrid.png')
-    pipeline = Pipeline()
-    pipeline.setSource(img)
+    def execute(self):
+        import importlib
 
-    pipeline.addFunction(combining_thresholds.mag_thresh)
-    pipeline.addFunction(combining_thresholds.dir_threshold)
+        src = self.source.copy()
 
-    for stage in pipeline.stages:
-        print ("\nFunction\n\t %s"%stage['name'])
+        for stage in self.stages:
+            print ("\nFunction\n\t %s"%stage['name'])
         
-        if len(stage['parameters']) > 0:
-            print("Args\n\t")
+            if len(stage['parameters']) > 0:
+                print("Args\n\t")
 
-        for param in stage['parameters']:
-            print("\t %s:%s:%s"%(param.name, param.default, param.value))
+            args = [src]
 
-        print()
+            for param in stage['parameters'][1:]:
+                args.append(param.value)
+                print("\t %s:%s:%s"%(param.name, param.default, param.value))
 
-    print(pipeline.paramMapping)
 
-if __name__ == "__main__":
-    main()
+            function_string = stage['name']
+            mod_name, func_name = function_string.rsplit('.',1)
+            mod = importlib.import_module(mod_name)
+            func = getattr(mod, func_name)
+            kwargs = {}
+            result = func(*args, **kwargs)
+
+
+
 
 
