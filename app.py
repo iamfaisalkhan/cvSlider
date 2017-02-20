@@ -25,7 +25,7 @@ class MainWindow(QMainWindow):
         self.statusBar().showMessage('Ready')
 
         self.setGeometry(300, 300, 1200, 1024)
-        self.setWindowTitle('OpenCV-pipeline')
+        self.setWindowTitle('OpenCV-Pipeline')
 
         self.cvImage = cv2.imread(r'signs_vehicles_xygrad.png')
         self.imageScene = ImageUI(self.cvImage)
@@ -38,20 +38,21 @@ class MainWindow(QMainWindow):
         self.controller = ControllerUI(self.pipeline)
         dock.setWidget(self.controller)
 
-        self.connect(self.controller, SIGNAL("applyChangesClicked()"), self._updateImage)
+        self.connect(self.controller, SIGNAL("valueChanged()"), self._updateImage)
 
         self.addDockWidget(Qt.RightDockWidgetArea, dock)
 
         self.show()
 
-    def _updateImage(self):
-        self.controller.setEnabledApplyChanges(False)
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Escape:
+            self.close()
 
+    def _updateImage(self):
         self.pipelineThread = PipelineThread(self.pipeline)
         self.connect(self.pipelineThread, SIGNAL("finished()"), self._imageReady)
         self.pipelineThread.start()
 
     def _imageReady(self):
-        self.imageScene.updateImage(None)
-        self.controller.setEnabledApplyChanges(True)
+        self.imageScene.updateImage(self.pipeline.getOutput())
 

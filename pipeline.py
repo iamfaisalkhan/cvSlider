@@ -7,6 +7,9 @@ class FuncParam:
         self.name = param.name
         self.default = param.default
         self.value = self.default
+
+        if type(self.value) == tuple:
+            self.value = self.default[0]
         
         self.key = "%d_%s_%s"%(index, funcName, self.name)
 
@@ -39,6 +42,9 @@ class Pipeline:
 
     def getSource(self):
         return self.source
+
+    def getOutput(self):
+        return self.output
 
     def addStep(self, func, output_size=(500, 500), display=True):
         funcName = func.__module__ + "." + func.__name__
@@ -75,7 +81,9 @@ class Pipeline:
             mod = importlib.import_module(mod_name)
             func = getattr(mod, func_name)
             kwargs = {}
-            result = func(*args, **kwargs)
+            src = result = func(*args, **kwargs)
+
+        self.output = src
 
 
 
