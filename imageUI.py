@@ -30,10 +30,10 @@ class ImageUI(QGraphicsView):
 
         self.setScene(self.scene)
 
-    def updateImage(self, image):
-        width, height = image.shape
+    def updateImage(self, qImage):
+        # width, height = image.shape
 
-        qImage = QImage(image, height, width, QImage.Format_Indexed8)
+        # qImage = QImage(image, height, width, QImage.Format_Indexed8)
 
         value = qRgb(0, 0, 0)
         qImage.setColor(0, value)
@@ -45,3 +45,4 @@ class ImageUI(QGraphicsView):
 
         self.viewItem.setPixmap(pixMap)
         self.viewItem.setPos(0, 0)
+

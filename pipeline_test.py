@@ -8,8 +8,8 @@ def main():
     pipeline = Pipeline()
     pipeline.setSource(img)
 
-    pipeline.addFunction(combining_thresholds.mag_thresh)
-    # pipeline.addFunction(combining_thresholds.dir_threshold)
+    # pipeline.addStep(combining_thresholds.mag_thresh)
+    pipeline.addStep(combining_thresholds.dir_threshold)
 
     pipeline.execute()
 

@@ -1,5 +1,10 @@
 import inspect
 import cv2
+import importlib
+
+
+from PyQt4.QtCore import *
+from PyQt4.QtGui import *
 
 class FuncParam:
     def __init__(self, param = inspect.Parameter, funcName="", index=0):
@@ -28,11 +33,16 @@ class FuncParam:
     def __srt__():
         return self.name
 
-class Pipeline:
+class Pipeline(QObject):
     def __init__(self):
+
+        super().__init__()
+
         self.stages = []
         self.paramMapping = {}
         self.source = None
+        self.videoSource = None
+        self.isVideo = False
 
     def setSource(self, image):
         """
@@ -40,13 +50,21 @@ class Pipeline:
         """ 
         self.source = image
 
+    def setVideoSource(self, video):
+        self.videoSource = video
+        self.isVideo = True
+
+        src = cv2.VideoCapture(self.videoSource)
+        if (src.isOpened()):
+            _, self.source = src.read()
+
     def getSource(self):
         return self.source
 
     def getOutput(self):
         return self.output
 
-    def addStep(self, func, output_size=(500, 500), display=True):
+    def addStep(self, func, src=None, display=1):
         funcName = func.__module__ + "." + func.__name__
         sig = inspect.signature(func)
 
@@ -59,31 +77,42 @@ class Pipeline:
         self.stages.append({"name" : funcName, "parameters" : stage})
 
     def execute(self):
-        import importlib
+        if not self.isVideo:
+            src = self.source.copy()
+            self._apply(src)
+            return
 
-        src = self.source.copy()
+        cap = cv2.VideoCapture(self.videoSource)
 
+        while (cap.isOpened()):
+            ret, frame = cap.read()
+
+            self._apply(frame)
+        
+    def _apply(self, image):
         for stage in self.stages:
             print ("\nFunction\n\t %s"%stage['name'])
         
             if len(stage['parameters']) > 0:
                 print("Args\n\t")
 
-            args = [src]
+            args = [image]
 
             for param in stage['parameters'][1:]:
                 args.append(param.value)
                 print("\t %s:%s:%s"%(param.name, param.default, param.value))
-
 
             function_string = stage['name']
             mod_name, func_name = function_string.rsplit('.',1)
             mod = importlib.import_module(mod_name)
             func = getattr(mod, func_name)
             kwargs = {}
-            src = result = func(*args, **kwargs)
+            image = func(*args, **kwargs)
 
-        self.output = src
+        qImage = QImage(image, image.shape[1], image.shape[0], QImage.Format_Indexed8)
+        self.emit(SIGNAL("imageReady(QImage)"), qImage)
+        self.output = image
+
 
 
 

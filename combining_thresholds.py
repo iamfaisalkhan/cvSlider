@@ -48,7 +48,7 @@ def mag_thresh(img, sobel_kernel=(1, 12), mag_thresh_min=(0, 255), mag_thresh_ma
     
     return binary_output
 
-def dir_threshold(img, sobel_kernel=3, min_value=(0, np.pi), max_value=(0, np.pi) ):
+def dir_threshold(img, sobel_kernel=(1,15), min_value=(0, np.pi), max_value=(0, np.pi) ):
 	    # Apply the following steps to img
     # 1) Convert to grayscale
     gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
@@ -63,7 +63,7 @@ def dir_threshold(img, sobel_kernel=3, min_value=(0, np.pi), max_value=(0, np.pi
     
     # 5) Create a binary mask where direction thresholds are met
     # 6) Return this mask as your binary_output image
-    binary_output = np.zeros_like(abs_sobelx)
+    binary_output = np.zeros_like(abs_sobelx, dtype=np.uint8)
     binary_output[(gradient_dir >= min_value) & (gradient_dir <= max_value)] = 1
     
     return binary_output
@@ -74,6 +74,29 @@ def abs_sobel_threshx(image, sobel_kernel=(1, 15), min_val=(0, 255), max_val=(0,
 def abs_sobel_threshy(image, sobel_kernel=(1, 15), min_val=(0, 255), max_val=(0, 255)):
     return abs_sobel_thresh(image, 'y', sobel_kernel, (min_val, max_val))
 
+def combined_threshold(image, sobel_kernel=(3, 15), 
+                               sobelx_min=(0, 255),
+                               sobelx_max=(0, 255),
+                               sobely_min=(0, 255),
+                               sobely_max=(0, 255),
+                               mag_thresh_min=(0, 255),
+                               mag_thresh_max=(0, 255),
+                               dir_thresh_min=(0.0, np.pi),
+                               dir_thresh_max=(0.0, np.pi)):
+
+    # Choose a Sobel kernel size
+    ksize = 9 # Choose a larger odd number to smooth gradient measurements
+
+    # Apply each of the thresholding functions
+    gradx = abs_sobel_threshx(image, ksize, sobelx_min, sobelx_max)
+    grady = abs_sobel_threshy(image, ksize, sobely_min, sobely_max)
+    mag_binary = mag_thresh(image, ksize, mag_thresh_min, mag_thresh_max)
+    dir_binary = dir_threshold(image, ksize, dir_thresh_min, dir_thresh_max)
+
+    combined = np.zeros_like(dir_binary)
+    combined[((gradx == 1) & (grady == 1)) | ((mag_binary == 1) & (dir_binary == 1))] = 1
+
+    return combined
 
 if __name__ == "__main__":
 
@@ -81,13 +104,9 @@ if __name__ == "__main__":
 	# Choose a Sobel kernel size
     ksize = 9 # Choose a larger odd number to smooth gradient measurements
 
-    # Apply each of the thresholding functions
-    gradx = abs_sobel_threshx(image, ksize, 0, 255)
-    grady = abs_sobel_threshy(image, ksize, 0, 255)
-    mag_binary = mag_thresh(image, ksize, mag_thresh_min=0, mag_thresh_max=100)
-    dir_binary = dir_threshold(image, ksize, 0, np.pi/2)
+    combined = combined_threshold(image, ksize, 0, 100, 0, 100, 0, 100, 0, np.pi/2)
 
-    plt.imshow(dir_binary, cmap='gray')
+    plt.imshow(combined, cmap='gray')
     plt.show()
 
     # combined = np.zeros_like(dir_binary)

@@ -11,13 +11,14 @@ def main():
     
     pipeline = Pipeline()
     pipeline.setSource(img)
+    # pipeline.setVideoSource('challenge_video.mp4')
 
-    pipeline.addStep(combining_thresholds.mag_thresh)
+    pipeline.addStep(combining_thresholds.combined_threshold)
     # pipeline.addStep(combining_thresholds.dir_threshold)
 
     app = QtGui.QApplication(sys.argv)
     myapp = MainWindow(pipeline)
-    myapp.showFullScreen()
+    myapp.showMaximized()
 
     sys.exit(app.exec_())
 

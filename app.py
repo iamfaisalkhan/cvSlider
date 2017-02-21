@@ -24,10 +24,11 @@ class MainWindow(QMainWindow):
 
         self.statusBar().showMessage('Ready')
 
-        self.setGeometry(300, 300, 1200, 1024)
+        self.setGeometry(100, 100, 1280, 1024)
         self.setWindowTitle('OpenCV-Pipeline')
 
-        self.cvImage = cv2.imread(r'signs_vehicles_xygrad.png')
+        self.cvImage = self.pipeline.getSource()
+
         self.imageScene = ImageUI(self.cvImage)
 
         self.setCentralWidget(self.imageScene)
@@ -50,9 +51,9 @@ class MainWindow(QMainWindow):
 
     def _updateImage(self):
         self.pipelineThread = PipelineThread(self.pipeline)
-        self.connect(self.pipelineThread, SIGNAL("finished()"), self._imageReady)
+        self.connect(self.pipeline, SIGNAL("imageReady(QImage)"), self._imageReady)
         self.pipelineThread.start()
 
-    def _imageReady(self):
-        self.imageScene.updateImage(self.pipeline.getOutput())
+    def _imageReady(self, qImage):
+        self.imageScene.updateImage(qImage)
 
