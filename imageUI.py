@@ -35,10 +35,10 @@ class ImageUI(QGraphicsView):
 
         # qImage = QImage(image, height, width, QImage.Format_Indexed8)
 
-        value = qRgb(0, 0, 0)
+        value = qRgb(255, 255, 255)
         qImage.setColor(0, value)
 
-        value = qRgb(255, 255, 255)
+        value = qRgb(0, 0, 0)
         qImage.setColor(1, value)
 
         pixMap = QPixmap.fromImage(qImage)

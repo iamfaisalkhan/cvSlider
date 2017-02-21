@@ -10,8 +10,8 @@ def main():
     img = cv2.imread('signs_vehicles_xygrad.png')
     
     pipeline = Pipeline()
-    pipeline.setSource(img)
-    # pipeline.setVideoSource('challenge_video.mp4')
+    # pipeline.setSource(img)
+    pipeline.setVideoSource('challenge_video.mp4')
 
     pipeline.addStep(combining_thresholds.combined_threshold)
     # pipeline.addStep(combining_thresholds.dir_threshold)
