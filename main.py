@@ -7,13 +7,13 @@ from app import MainWindow
 from pipeline import Pipeline
 
 def main():
-    img = cv2.imread('signs_vehicles_xygrad.png')
+    img = cv2.imread(sys.argv[1])
     
     pipeline = Pipeline()
-    # pipeline.setSource(img)
-    pipeline.setVideoSource('challenge_video.mp4')
+    pipeline.setSource(img)
+    # pipeline.setVideoSource('challenge_video.mp4')
 
-    pipeline.addStep(combining_thresholds.combined_threshold)
+    pipeline.addStep(combining_thresholds.combined_threshold2)
     # pipeline.addStep(combining_thresholds.dir_threshold)
 
     app = QtGui.QApplication(sys.argv)

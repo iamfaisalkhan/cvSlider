@@ -74,15 +74,32 @@ def abs_sobel_threshx(image, sobel_kernel=(1, 15), min_val=(0, 255), max_val=(0,
 def abs_sobel_threshy(image, sobel_kernel=(1, 15), min_val=(0, 255), max_val=(0, 255)):
     return abs_sobel_thresh(image, 'y', sobel_kernel, (min_val, max_val))
 
+def color_threshold(image, sthresh=(0, 255), vthresh=(0, 255)):
+    hls = cv2.cvtColor(image, cv2.COLOR_BGR2HLS)
+
+    s_channel = hls[:, :, 2]
+    s_binary = np.zeros_like(s_channel)
+    s_binary[ (s_channel > sthresh[0]) & (s_channel <= sthresh[1])] =  1
+
+    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    v_channel = hsv[:, :, 2]
+    v_binary = np.zeros_like(v_channel)
+    v_binary[ (v_channel > vthresh[0]) & (v_channel <= vthresh[1])] = 1
+
+    output = np.zeros_like(s_channel)
+    output[(s_binary == 1) & (v_binary == 1)] = 1
+
+    return output
+
 def combined_threshold(image, sobel_kernel=(3, 15), 
                                sobelx_min=(0, 255),
                                sobelx_max=(0, 255),
                                sobely_min=(0, 255),
                                sobely_max=(0, 255),
-                               mag_thresh_min=(0, 255),
-                               mag_thresh_max=(0, 255),
-                               dir_thresh_min=(0.0, np.pi),
-                               dir_thresh_max=(0.0, np.pi)):
+                               schannel_min=(0, 255),
+                               schannel_max=(0, 255),
+                               v_channel_min=(0, 255),
+                               v_channel_max=(0, 255)):
 
     # Choose a Sobel kernel size
     ksize = 9 # Choose a larger odd number to smooth gradient measurements
@@ -90,11 +107,35 @@ def combined_threshold(image, sobel_kernel=(3, 15),
     # Apply each of the thresholding functions
     gradx = abs_sobel_threshx(image, ksize, sobelx_min, sobelx_max)
     grady = abs_sobel_threshy(image, ksize, sobely_min, sobely_max)
+    color_binary = color_threshold(image, (schannel_min, schannel_max), (v_channel_min, v_channel_max))
+
+    combined = np.zeros_like(color_binary)
+    combined[((gradx == 1) & (grady == 1)) | color_binary == 1] = 1
+
+    return combined
+
+def combined_threshold2(image, sobel_kernel=(3, 15), 
+                               schannel_min=(0, 255),
+                               schannel_max=(0, 255),
+                               v_channel_min=(0, 255),
+                               v_channel_max=(0, 255),
+                               mag_thresh_min=(0, 255),
+                               mag_thresh_max=(0, 255),
+                               dir_thresh_min=(0.0, np.pi),
+                               dir_thresh_max=(0.0, np.pi)):
+
+    # Choose a Sobel kernel size
+    ksize = sobel_kernel
+
+    # Apply each of the thresholding functions
+    # gradx = abs_sobel_threshx(image, ksize, sobelx_min, sobelx_max)
+    # grady = abs_sobel_threshy(image, ksize, sobely_min, sobely_max)
     mag_binary = mag_thresh(image, ksize, mag_thresh_min, mag_thresh_max)
     dir_binary = dir_threshold(image, ksize, dir_thresh_min, dir_thresh_max)
+    color_binary = color_threshold(image, (schannel_min, schannel_max), (v_channel_min, v_channel_max))
 
     combined = np.zeros_like(dir_binary)
-    combined[((gradx == 1) & (grady == 1)) | ((mag_binary == 1) & (dir_binary == 1))] = 1
+    combined[( (mag_binary == 1) & (dir_binary == 1) ) | color_binary == 1] = 1
 
     return combined
 
